@@ -1,39 +1,33 @@
-// App.js
 import { NavigationContainer } from "@react-navigation/native";
-import * as ExpoSplash from "expo-splash-screen";
-import { useCallback, useEffect, useState } from "react";
-import { View } from "react-native";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
+
 import AppNavigator from "./navigation/AppNavigator";
 
 
-ExpoSplash.preventAutoHideAsync();
+import { Montserrat_800ExtraBold } from "@expo-google-fonts/montserrat";
+import { Roboto_400Regular } from "@expo-google-fonts/roboto";
+
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-  const [ready, setReady] = useState(false);
+  const [loaded] = useFonts({
+    Montserrat_800ExtraBold,
+    Roboto_400Regular,
+  });
 
   useEffect(() => {
-    (async () => {
-      // If you load fonts/assets, do it here before setReady(true)
-      // Example:
-      // await Font.loadAsync({...});
+    if (loaded) SplashScreen.hideAsync();
+  }, [loaded]);
 
-      setReady(true);
-    })();
-  }, []);
-
-  const onLayoutRootView = useCallback(async () => {
-    if (ready) {
-      await ExpoSplash.hideAsync(); 
-    }
-  }, [ready]);
-
-  if (!ready) return null;
+  if (!loaded) return null;
 
   return (
-    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-      <NavigationContainer>
+    <NavigationContainer>
+      
         <AppNavigator />
-      </NavigationContainer>
-    </View>
+      
+    </NavigationContainer>
   );
 }

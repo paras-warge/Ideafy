@@ -1,16 +1,84 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Image, StyleSheet, Text, View } from "react-native";
+import {
+  Animated,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { checkConnection } from "../utils/connectionCheck";
+import { logEvent } from "../utils/ServerLogger";
 
-export default function SplashScreen({ navigation }) {
+export default function SplashScreen() {
+  const navigation = useNavigation();
+  const [blockW, setBlockW] = useState(null);
+  const x = useRef(new Animated.Value(0)).current;
+
+  const [offline, setOffline] = useState(false);
+
   useEffect(() => {
-    const t = setTimeout(() => navigation.replace("HomeScreen"), 3000);
-    return () => clearTimeout(t);
+    let t;
+
+    const run = async () => {
+      setOffline(false);
+
+      
+      const net = await checkConnection();
+      const hasInternet =
+        net.isConnected === true &&
+        net.isInternetReachable !== false;
+
+      if (!hasInternet) {
+        setOffline(true);
+        return; 
+      }
+
+      
+      await logEvent("connection_check", net);
+      await logEvent("app_open", { screen: "Splash" });
+
+      const key = "FIRST_OPEN_DONE_V1";
+      const done = await AsyncStorage.getItem(key);
+      if (!done) {
+        await logEvent("install_first_open", {});
+        await AsyncStorage.setItem(key, "1");
+      }
+
+      t = setTimeout(() => navigation.replace("HomeScreen"), 1000);
+    };
+
+    run();
+
+    return () => {
+      if (t) clearTimeout(t);
+    };
   }, [navigation]);
 
+  
+  const retry = async () => {
+    setOffline(false);
 
-  const x = useRef(new Animated.Value(0)).current;
-  const [blockW, setBlockW] = useState(0);
+    const net = await checkConnection();
+    const hasInternet =
+      net.isConnected === true &&
+      net.isInternetReachable !== false;
+
+    if (!hasInternet) {
+      setOffline(true);
+      return;
+    }
+
+    await logEvent("connection_check_retry", net);
+    await logEvent("app_open_retry", { screen: "Splashscreen" });
+
+    const t = setTimeout(() => navigation.replace("HomeScreen"), 500);
+    return () => clearTimeout(t);
+  };
+
 
   useEffect(() => {
     if (!blockW) return;
@@ -22,7 +90,6 @@ export default function SplashScreen({ navigation }) {
         duration: 12000,
         useNativeDriver: true,
       }).start(({ finished }) => finished && run());
-      
     };
 
     run();
@@ -59,23 +126,20 @@ export default function SplashScreen({ navigation }) {
 
   return (
     <View style={styles.root}>
-      
       <LinearGradient
+        locations={[0, 0.8]}
         colors={["#212325", "#141517"]}
-        start={{ x: 0.5, y: 1 }}
-        end={{ x: 0.5, y: 0 }}
+        start={{ x: 0, y: 1 }}
+        end={{ x: 0, y: 0 }}
         style={StyleSheet.absoluteFill}
       />
 
-      
       <Image
         source={require("../images/Starlayer.png")}
         style={styles.starlayer}
         resizeMode="cover"
       />
-      <View style={styles.starOverlay} />
 
-      
       <View style={styles.brandBlock}>
         <Text style={styles.brand}>IDEAFY</Text>
         <Text style={styles.brandSub}>IDEAMAGIX</Text>
@@ -93,7 +157,6 @@ export default function SplashScreen({ navigation }) {
         </Text>
       </View>
 
-      
       <View pointerEvents="none" style={styles.collageArea}>
         <Animated.View
           style={[
@@ -104,20 +167,26 @@ export default function SplashScreen({ navigation }) {
           {imagesBlock}
           {imagesBlock}
         </Animated.View>
-
-        <LinearGradient
-          colors={["#141517", "transparent"]}
-          start={{ x: 0, y: 0.5 }}
-          end={{ x: 1, y: 0.5 }}
-          style={styles.edgeLeft}
-        />
-        <LinearGradient
-          colors={["#141517", "transparent"]}
-          start={{ x: 1, y: 0.5 }}
-          end={{ x: 0, y: 0.5 }}
-          style={styles.edgeRight}
-        />
       </View>
+
+      {offline && (
+        <View style={styles.offlineWrap}>
+          <Text style={styles.offlineTitle}>No Internet Connection</Text>
+          <Text style={styles.offlineSub}>
+            Turn on Wi-Fi or mobile data, then press Retry.
+          </Text>
+
+          <Pressable
+            onPress={retry}
+            style={({ pressed }) => [
+              styles.retryBtn,
+              pressed && { opacity: 0.9 },
+            ]}
+          >
+            <Text style={styles.retryText}>Retry</Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -132,42 +201,22 @@ export const styles = StyleSheet.create({
     right: 0,
     height: 560,
     opacity: 1,
-    zIndex: 5,
+    zIndex: 2,
   },
 
-  starOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 560,
-    backgroundColor: "#141517",
-    opacity: 0.28,
+  brandBlock: { marginTop: 78, alignItems: "center", zIndex: 5 },
+
+  brand: {
+    color: "#EDEDED",
+    letterSpacing: 10,
+    fontSize: 18,
+    fontWeight: "500",
   },
 
-  brandBlock: 
-  { marginTop: 78, 
-    alignItems: "center", 
-    zIndex: 5 },
-  
-    brand: 
-    { color: "#EDEDED",
-       letterSpacing: 8, 
-       fontSize: 18, 
-       fontWeight: "500" },
-  
-    brandSub: 
-    { marginTop: 8, 
-      color: "#8d8787",
-      letterSpacing: 4, 
-      fontSize: 10 },
+  brandSub: { marginTop: 8, color: "#8d8787", letterSpacing: 4, fontSize: 10 },
 
-  content: 
-  { marginTop: 62, 
-    width: "86%", 
-    alignItems: "center", 
-    zIndex: 5 },
-  
+  content: { marginTop: 62, width: "86%", alignItems: "center", zIndex: 5 },
+
   title: {
     fontSize: 44,
     fontFamily: "Montserrat_800ExtraBold",
@@ -176,6 +225,7 @@ export const styles = StyleSheet.create({
     lineHeight: 52,
     marginBottom: 16,
   },
+
   subtitle: {
     fontSize: 14,
     fontFamily: "Roboto_400Regular",
@@ -201,30 +251,51 @@ export const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
 
-  collageBlock: 
-  { paddingHorizontal: 25 },
-  
-  row: 
-  { flexDirection: "row", 
-    justifyContent: "center" },
-  
-  tile: 
-  { width: 100, 
-    height: 150, 
-    borderRadius: 16, 
-    margin: 10 },
+  collageBlock: { paddingHorizontal: 2 },
+  row: { flexDirection: "row", justifyContent: "center" },
+  tile: { width: 100, height: 150, borderRadius: 16, margin: 10 },
 
-  edgeLeft: 
-  { position: "absolute", 
-    left: 0, 
-    bottom: 0, 
-    width: 90, 
-    height: 420 },
-  
-  edgeRight: 
-  { position: "absolute", 
-    right: 0, 
-    bottom: 0, 
-    width: 90, 
-    height: 420 },
+  offlineWrap: {
+    position: "absolute",
+    left: 20,
+    right: 20,
+    bottom: 54,
+    zIndex: 50,
+    padding: 16,
+    borderRadius: 18,
+    backgroundColor: "rgba(0,0,0,0.40)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.12)",
+  },
+
+  offlineTitle: {
+    color: "rgba(255,255,255,0.95)",
+    fontSize: 14,
+    fontWeight: "800",
+  },
+
+  offlineSub: {
+    marginTop: 6,
+    color: "rgba(255,255,255,0.65)",
+    fontSize: 12,
+    lineHeight: 18,
+    fontWeight: "600",
+  },
+
+  retryBtn: {
+    marginTop: 12,
+    alignSelf: "flex-start",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.25)",
+  },
+
+  retryText: {
+    color: "rgba(255,255,255,0.92)",
+    fontWeight: "800",
+    fontSize: 12,
+    letterSpacing: 0.2,
+  },
 });

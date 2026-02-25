@@ -1,29 +1,44 @@
 {
   "expo": {
     "name": "Ideafy",
-    "slug": "Ideafy",
+    "slug": "ideafy",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
 
     "splash": {
-      "image": "./assets/images/icon.png",
+      "image": "./assets/images/splash.png",
       "resizeMode": "cover",
       "backgroundColor": "#141517"
     },
 
+    "ios": {
+      "supportsTablet": true
+    },
+
     "android": {
-      "edgeToEdgeEnabled": true
+      "package": "com.paras_2216.ideafy",
+      "edgeToEdgeEnabled": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#141517"
+      },
+      "permissions": [
+        "INTERNET",
+        "READ_MEDIA_VIDEO"
+      ]
     },
 
     "plugins": [
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash.png",
-          "resizeMode": "cover",
-          "backgroundColor": "#141517"
-        }
-      ]
-    ]
+      "expo-router"
+    ],
+
+    "extra": {
+      "eas": {
+        "projectId": "8ac0e8ed-deee-443d-b37d-d7c7d51ff994"
+      }
+    }
   }
 }

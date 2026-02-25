@@ -1,5 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
@@ -10,68 +12,41 @@ import {
   View,
 } from "react-native";
 
-const DATA = [
-  {
-    id: "1",
-    name: "Video1.mp4",
-    size: "4.2 MB",
-    date: "16 Jan , 3:45 PM",
-    thumb: require("../images/image1.png"),
-  },
-  {
-    id: "2",
-    name: "Video2.mp4",
-    size: "20MB",
-    date: "16 Jan , 3:45 PM",
-    thumb: require("../images/image7.png"),
-  },
-  {
-    id: "3",
-    name: "Video3.mp4",
-    size: "25MB",
-    date: "16 Jan , 3:45 PM",
-    thumb: require("../images/image10.png"),
-  },
-  {
-    id: "4",
-    name: "Video4.mp4",
-    size: "30MB",
-    date: "16 Jan , 3:45 PM",
-    thumb: require("../images/image8.png"),
-  },
-];
+import BackIcon from "../icons/back.svg";
+
+const HISTORY_KEY = "IDEAFY_HISTORY";
 
 export default function HistoryScreen({ navigation }) {
+  const [data, setData] = useState([]);
   const [selected, setSelected] = useState(null);
 
-  const closeSheet = () => setSelected(null);
+  useEffect(() => {
+    loadHistory();
+  }, []);
 
-  const onSave = () => {
-    // TODO
-    closeSheet();
+  const loadHistory = async () => {
+    const stored = await AsyncStorage.getItem(HISTORY_KEY);
+    setData(stored ? JSON.parse(stored) : []);
   };
 
-  const onShare = () => {
-    // TODO
-    closeSheet();
-  };
-
-  const onDelete = () => {
-    // TODO
-    closeSheet();
+  const deleteItem = async () => {
+    const filtered = data.filter((i) => i.id !== selected.id);
+    await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(filtered));
+    setData(filtered);
+    setSelected(null);
   };
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
-      <Image source={item.thumb} style={styles.thumb} resizeMode="cover" />
+      <Image source={{ uri: item.localUri }} style={styles.thumb} />
 
       <View style={styles.meta}>
         <Text numberOfLines={1} style={styles.fileName}>
-          {item.name}
+          {item.title}
         </Text>
 
         <View style={styles.metaLine}>
-          <Text style={styles.size}>{item.size}</Text>
+          <Text style={styles.size}>{item.quality}</Text>
           <Text style={styles.date}>{item.date}</Text>
         </View>
       </View>
@@ -86,8 +61,8 @@ export default function HistoryScreen({ navigation }) {
     <View style={styles.root}>
       <LinearGradient
         colors={["#212325", "#141517"]}
-        start={{ x: 0.5, y: 1 }}
-        end={{ x: 0.5, y: 0 }}
+        start={{ x: 0, y: 1 }}
+        end={{ x: 0, y: 0 }}
         style={StyleSheet.absoluteFill}
       />
 
@@ -96,14 +71,13 @@ export default function HistoryScreen({ navigation }) {
         style={styles.starlayer}
         resizeMode="cover"
       />
-      <View style={styles.starOverlay} />
 
-      <Pressable style={styles.smallIconBtn} onPress={() => navigation.goBack()}>
-        <Image
-          source={require("../images/Back.png")}
-          style={styles.smallIconImg}
-          resizeMode="contain"
-        />
+      
+      <Pressable
+        style={styles.smallIconBtn}
+        onPress={() => navigation.goBack()}
+      >
+        <BackIcon width={85} height={85} />
       </Pressable>
 
       <View style={styles.brandBlock}>
@@ -112,7 +86,7 @@ export default function HistoryScreen({ navigation }) {
       </View>
 
       <FlatList
-        data={DATA}
+        data={data}
         keyExtractor={(i) => i.id}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
@@ -128,44 +102,31 @@ export default function HistoryScreen({ navigation }) {
         <Text style={styles.mode}>VIDEO</Text>
       </View>
 
-      
+      {selected && (
+        <BlurView intensity={80} tint="dark" style={StyleSheet.absoluteFill} />
+      )}
+
       <Modal
         visible={!!selected}
         transparent
         animationType="fade"
-        onRequestClose={closeSheet}
+        onRequestClose={() => setSelected(null)}
       >
-        
-        <View style={styles.blurLayer} />
+        <View style={styles.modalOverlay}>
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={() => setSelected(null)}
+          />
 
-        
-        <Pressable style={styles.modalBackdrop} onPress={closeSheet} />
-
-        <View style={styles.sheet}>
-          <Pressable style={styles.sheetItem} onPress={onSave}>
-            <View style={[styles.sheetIcon, styles.iconPurple]}>
-              <Text style={styles.iconGlyph}>⤓</Text>
-            </View>
-            <Text style={styles.sheetText}>Save To Gallery</Text>
-          </Pressable>
-
-          <View style={styles.sheetDivider} />
-
-          <Pressable style={styles.sheetItem} onPress={onShare}>
-            <View style={[styles.sheetIcon, styles.iconBlue]}>
-              <Text style={styles.iconGlyph}>⤴</Text>
-            </View>
-            <Text style={styles.sheetText}>Share</Text>
-          </Pressable>
-
-          <View style={styles.sheetDivider} />
-
-          <Pressable style={styles.sheetItem} onPress={onDelete}>
-            <View style={[styles.sheetIcon, styles.iconRed]}>
-              <Text style={styles.iconGlyph}>⌫</Text>
-            </View>
-            <Text style={styles.sheetText}>Delete</Text>
-          </Pressable>
+          <View style={styles.sheet}>
+            <Pressable style={styles.sheetItem} onPress={deleteItem}>
+              <Image
+                source={require("../images/delete.png")}
+                style={styles.sheetImg}
+              />
+              <Text style={styles.sheetText}>Delete</Text>
+            </Pressable>
+          </View>
         </View>
       </Modal>
     </View>
@@ -175,40 +136,27 @@ export default function HistoryScreen({ navigation }) {
 const styles = StyleSheet.create({
   root: { flex: 1 },
 
-  smallIconBtn: {
-    position: "absolute",
-    top: 86,
-    left: 24,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.18)",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 10,
-  },
-  smallIconImg: { width: 90, height: 90 },
-
-    starlayer: {
+  starlayer: {
     position: "absolute",
     top: 80,
     left: 0,
     right: 0,
     height: 560,
-    opacity: 1,
-    zIndex: 5,
+    zIndex: 2,
   },
 
-  starOverlay: {
+  smallIconBtn: {
     position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 560,
-    backgroundColor: "#141517",
-    opacity: 0.28,
-    zIndex: 2,
+    top: 70,
+    left: 28,
+    width: 36,
+    height: 36,
+    borderRadius: 0,
+    borderWidth: 0,
+    borderColor: "rgba(255,255,255,0.18)",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 20,
   },
 
   brandBlock: {
@@ -216,12 +164,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     zIndex: 10,
   },
+
   brand: {
     color: "#EDEDED",
-    letterSpacing: 8,
+    letterSpacing: 10,
     fontSize: 26,
     fontWeight: "500",
   },
+
   brandSub: {
     marginTop: 8,
     color: "#8d8787",
@@ -238,12 +188,11 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.28)",
+    backgroundColor: "rgba(0,0,0,0.28)",
     borderRadius: 18,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.08)",
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    padding: 16,
     marginBottom: 20,
   },
 
@@ -252,7 +201,6 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 14,
     marginRight: 14,
-    backgroundColor: "#212325",
   },
 
   meta: { flex: 1 },
@@ -264,10 +212,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  metaLine: { flexDirection: "row", alignItems: "center", gap: 16 },
+  metaLine: {
+    flexDirection: "row",
+    gap: 16,
+  },
 
   size: {
-    color: "rgba(86, 214, 156, 0.95)",
+    color: "rgba(86,214,156,0.95)",
     fontSize: 12,
     fontWeight: "700",
   },
@@ -275,14 +226,11 @@ const styles = StyleSheet.create({
   date: {
     color: "rgba(255,255,255,0.6)",
     fontSize: 12,
-    fontWeight: "600",
   },
 
   menuBtn: {
     width: 44,
-    height: 36,
     alignItems: "flex-end",
-    justifyContent: "center",
   },
 
   menuDots: {
@@ -298,12 +246,10 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: "center",
-    zIndex: 10,
   },
 
   dotsRow: {
     flexDirection: "row",
-    alignItems: "center",
     gap: 10,
     marginBottom: 6,
   },
@@ -315,7 +261,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF9A57",
   },
 
-  dotMiddle: { transform: [{ translateY: -5 }] },
+  dotMiddle: {
+    transform: [{ translateY: -10 }],
+  },
 
   mode: {
     color: "rgba(255,255,255,0.75)",
@@ -323,65 +271,33 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
 
-  
-  blurLayer: {
+  modalOverlay: {
     ...StyleSheet.absoluteFillObject,
-
-    backgroundColor: "rgba(10,10,10,0.55)", 
-  },
-
-  modalBackdrop: {
-    ...StyleSheet.absoluteFillObject,
+    justifyContent: "flex-end",
   },
 
   sheet: {
-    position: "absolute",
-    left: 18,
-    right: 18,
-    bottom: 28,
+    margin: 20,
     borderRadius: 18,
-    backgroundColor: "rgba(20,21,23,0.92)",
+    backgroundColor: "#121111",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.08)",
-    paddingVertical: 8,
   },
 
   sheetItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 18,
-    paddingVertical: 16,
+    padding: 18,
   },
 
-  sheetDivider: {
-    height: 1,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    marginLeft: 18,
-  },
-
-  sheetIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
+  sheetImg: {
+    width: 22,
+    height: 22,
     marginRight: 14,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-  },
-
-  iconPurple: { backgroundColor: "rgba(168,85,247,0.18)" },
-  iconBlue: { backgroundColor: "rgba(59,130,246,0.18)" },
-  iconRed: { backgroundColor: "rgba(239,68,68,0.18)" },
-
-  iconGlyph: {
-    color: "rgba(255,255,255,0.85)",
-    fontSize: 16,
-    fontWeight: "800",
   },
 
   sheetText: {
-    color: "rgba(255,255,255,0.9)",
+    color: "#fff",
     fontSize: 14,
     fontWeight: "600",
   },
