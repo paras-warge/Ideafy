@@ -1,13 +1,10 @@
+import { Montserrat_800ExtraBold } from "@expo-google-fonts/montserrat";
+import { Roboto_400Regular } from "@expo-google-fonts/roboto";
 import { NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-
 import AppNavigator from "./navigation/AppNavigator";
-
-
-import { Montserrat_800ExtraBold } from "@expo-google-fonts/montserrat";
-import { Roboto_400Regular } from "@expo-google-fonts/roboto";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,9 +22,7 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      
-        <AppNavigator />
-      
+      <AppNavigator />
     </NavigationContainer>
   );
 }

@@ -142,7 +142,7 @@ export default function SplashScreen() {
 
       <View style={styles.brandBlock}>
         <Text style={styles.brand}>IDEAFY</Text>
-        <Text style={styles.brandSub}>IDEAMAGIX</Text>
+        
       </View>
 
       <View style={styles.content}>
@@ -213,7 +213,7 @@ export const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  brandSub: { marginTop: 8, color: "#8d8787", letterSpacing: 4, fontSize: 10 },
+  
 
   content: { marginTop: 62, width: "86%", alignItems: "center", zIndex: 5 },
 
@@ -251,7 +251,10 @@ export const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
 
-  collageBlock: { paddingHorizontal: 2 },
+  collageBlock: {
+     paddingHorizontal: 2 
+    },
+
   row: { flexDirection: "row", justifyContent: "center" },
   tile: { width: 100, height: 150, borderRadius: 16, margin: 10 },
 

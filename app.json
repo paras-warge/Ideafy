@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
 
     "splash": {
       "image": "./assets/images/splash.png",
@@ -15,29 +14,42 @@
     },
 
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.paraswarge.ideafy",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
 
     "android": {
       "package": "com.paras_2216.ideafy",
-      "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#141517"
       },
       "permissions": [
-        "INTERNET",
-        "READ_MEDIA_VIDEO"
+        "android.permission.INTERNET",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_IMAGES"
       ]
     },
 
     "plugins": [
-      "expo-router"
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Ideafy to access your media.",
+          "savePhotosPermission": "Allow Ideafy to save videos to your gallery.",
+          "isAccessMediaLocationEnabled": false
+        }
+      ]
     ],
+
+    "owner": "parass1604",
 
     "extra": {
       "eas": {
-        "projectId": "8ac0e8ed-deee-443d-b37d-d7c7d51ff994"
+        "projectId": "9d3341f5-1b13-4ada-ae99-bdedb2e65c8c"
       }
     }
   }

@@ -60,7 +60,7 @@ export default function SettingScreen({ navigation }) {
 
           <View style={styles.brandBlock}>
             <Text style={styles.brand}>IDEAFY</Text>
-            <Text style={styles.brandSub}>IDEAMAGIX</Text>
+            
           </View>
 
          
@@ -133,13 +133,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  starlayer: {
+   starlayer: {
     position: "absolute",
     alignSelf: "center",
     top: "15%",
     width: "100%",
     height: "70%",
-    opacity: 0.25,
+    opacity: 0.75,
     
   },
 
@@ -175,12 +175,6 @@ brand: {
   fontWeight: "500",
 },
 
-brandSub: {
-  marginTop: 6,
-  color: "#8d8787",
-  letterSpacing: 4,
-  fontSize: 12,
-},
 
   list: {
     gap: 16,

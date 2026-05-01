@@ -80,7 +80,7 @@ export default function PremiumScreen({ navigation }) {
           >
             <View style={styles.brandBlock}>
               <Text style={styles.brand}>IDEAFY</Text>
-              <Text style={styles.brandSub}>IDEAMAGIX</Text>
+              
             </View>
 
             <Text style={styles.title}>Unlock Premium</Text>
@@ -211,12 +211,7 @@ brand: {
   fontWeight: "500",
 },
 
-brandSub: {
-  marginTop: 6,
-  color: "#8d8787",
-  letterSpacing: 4,
-  fontSize: 12,
-},
+
 
   title: {
     marginTop: 35,

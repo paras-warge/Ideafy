@@ -82,7 +82,7 @@ export default function HistoryScreen({ navigation }) {
 
       <View style={styles.brandBlock}>
         <Text style={styles.brand}>IDEAFY</Text>
-        <Text style={styles.brandSub}>IDEAMAGIX</Text>
+        
       </View>
 
       <FlatList
@@ -172,12 +172,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  brandSub: {
-    marginTop: 8,
-    color: "#8d8787",
-    letterSpacing: 4,
-    fontSize: 10,
-  },
+  
 
   listContent: {
     paddingTop: 36,

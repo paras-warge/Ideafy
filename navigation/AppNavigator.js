@@ -12,13 +12,13 @@ export default function AppNavigator() {
   return (
     <Stack.Navigator
       initialRouteName="SplashScreen"
-      screenOptions={{ headerShown: false }}
+      screenOptions={{ headerShown: false, animation: "fade" }}
     >
       <Stack.Screen name="SplashScreen" component={SplashScreen} />
       <Stack.Screen name="HomeScreen" component={HomeScreen} />
-      <Stack.Screen name="History" component={HistoryScreen} />
-      <Stack.Screen name="SettingScreen" component={SettingScreen} />
-      <Stack.Screen name="PremiumScreen" component={PremiumScreen} />
+      <Stack.Screen name="Histor" component={HistoryScreen} />
+      <Stack.Screen name="SettingScree" component={SettingScreen} />
+      <Stack.Screen name="PremiumScree" component={PremiumScreen} />
     </Stack.Navigator>
   );
 }
